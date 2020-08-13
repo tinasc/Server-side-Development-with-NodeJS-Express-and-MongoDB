@@ -1,32 +1,43 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var cookieParser=require('cookie-parser');
+var session=require('express-session');
+var FileStore=require('session-file-store')(session);
 var logger = require('morgan');
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
+var bodyParser = require('body-parser')
 var passport = require('passport');
+var authenticate= require('./authenticate');
+var LocalStrategy = require('passport-local').Strategy;
+var mongoose = require('mongoose');
+
 var config = require('./config');
 
+mongoose.connect(config.mongoUrl);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+    // we're connected!
+    console.log("Connected correctly to server");
+});
+
+
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var users = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
-const mongoose = require('mongoose');
+
 
 const Dishes = require('./models/dishes');
 const Promotions = require('./models/promotions');
 const Leaders = require('./models/leaders');
 
-const url = config.mongoUrl;
-const connect = mongoose.connect(url);
-
-connect.then((db) => {
-    console.log("Connected correctly to server");
-}, (err) => { console.log(err); });
 
 var app = express();
+
+
 
 
 // view engine setup
@@ -35,23 +46,18 @@ app.set('view engine', 'jade');
 
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321'));
 
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}));
 
 app.use(passport.initialize());
-app.use(passport.session());
+
+
+
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/users', users);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
