@@ -23,7 +23,7 @@ db.once('open', function () {
 
 
 var indexRouter = require('./routes/index');
-var users = require('./routes/users');
+var router = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
@@ -56,8 +56,9 @@ app.use(passport.initialize());
 
 
 
+
 app.use('/', indexRouter);
-app.use('/users', users);
+app.use('/users', router);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
