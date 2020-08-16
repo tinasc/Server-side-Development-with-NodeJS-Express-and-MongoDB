@@ -10,7 +10,7 @@ router.use(bodyParser.json());
 
 
 /* GET users listing. */
-router.get('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function (req, res, next) {
+router.get('/',cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin,  (req, res, next)=> {
   User.find({})
       .then((err, users) => {
           if (err) {
@@ -75,5 +75,15 @@ router.get('/logout', (req, res) => {
     next(err);
   }
 });
+
+/*router.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+  if (req.user) {
+    var token = authenticate.getToken({_id: req.user._id});
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: true, token: token, status: 'You are successfully logged in!'});
+  }
+}); */
+
 
 module.exports = router;
